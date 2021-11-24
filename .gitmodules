@@ -1,20 +1,20 @@
 [submodule "android/libraries/store"]
 	path = android/libraries/store
-	url = git@github.com:CoinbaseWallet/Stores.git
+	url = git@github.com:Zxu49/Stores.git
         branch = master
 [submodule "android/libraries/core"]
 	path = android/libraries/core
-	url = git@github.com:CoinbaseWallet/CBCore.git
+	url = git@github.com:Zxu49/CBCore.git
 	branch = master
 [submodule "android/libraries/http"]
 	path = android/libraries/http
-	url = git@github.com:CoinbaseWallet/CBHTTP.git
+	url = git@github.com:Zxu49/CBHTTP.git
 	branch = master
 [submodule "android/libraries/database"]
 	path = android/libraries/database
-	url = git@github.com:CoinbaseWallet/CBDatabase.git
+	url = git@github.com:Zxu49/CBDatabase.git
 	branch = master
 [submodule "android/libraries/crypto"]
 	path = android/libraries/crypto
-	url = git@github.com:CoinbaseWallet/CBCrypto.git
+	url = git@github.com:Zxu49/CBCrypto.git
 	branch = master
