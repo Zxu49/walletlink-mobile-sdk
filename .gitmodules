@@ -1,6 +1,6 @@
 [submodule "android/libraries/store"]
 	path = android/libraries/store
-	url = git@github.com:Zxu49/Stores.git
+	url = git@github.com:Zxu49/CBStore.git
         branch = master
 [submodule "android/libraries/core"]
 	path = android/libraries/core
