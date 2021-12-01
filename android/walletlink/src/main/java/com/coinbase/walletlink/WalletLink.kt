@@ -209,20 +209,23 @@ class WalletLink(private val notificationUrl: URL, context: Context) : WalletLin
     }
 
     private fun processHostSessionResponse(incoming : String ,sessionID: String, secret: String) {
-        val obj = JSONObject(incoming)
         try{
-            val type = obj.getString("type")
-            if (type == "OK") {
-                sendIsLinkedRequest(sessionID)
-            } else if (type == "IsLinkedOK") {
-                sendSessionConfig(sessionID)
-            } else if (type == "GetSessionConfigOK") {
-                sendDAppPermissionEvent(sessionID, secret)
-            } else if (type == "PublishEventOK") {
-                WebsocketClient.requestsObservable
-                    .observeOn(serialScheduler)
-                    .subscribe { processIncomingData(it, secret)}
-                    .addTo(disposeBag)
+            if (incoming == "Socket Closed") {
+                println("Socket close in processHostSessionResponse")
+            }
+            val obj = JSONObject(incoming)
+
+            when (obj.getString("type")) {
+                "OK" -> sendIsLinkedRequest(sessionID)
+                "IsLinkedOK" -> sendSessionConfig(sessionID)
+                "GetSessionConfigOK" -> sendDAppPermissionEvent(sessionID, secret)
+                "PublishEventOK" -> {
+                    WebsocketClient.requestsObservable
+                        .observeOn(serialScheduler)
+                        .subscribe { processIncomingData(it, secret) }
+                        .addTo(disposeBag)
+                }
+
             }
         } catch (e : WalletLinkException) {
             println(e)
