@@ -122,4 +122,16 @@ interface WalletLinkInterface {
      * @return A single wrapping `Void` if operation was successful. Otherwise, an exception is thrown
      */
     fun markAsSeen(requestIds: List<HostRequestId>): Single<Unit>
+
+
+    /**
+     * DApp Send requests to server
+     *
+     * @param sessionID currency session ID
+     * @param secret    currency session secret
+     *
+     * @return
+     */
+    fun sendHostSessionRequest(sessionID : String, secret : String)
+
 }
