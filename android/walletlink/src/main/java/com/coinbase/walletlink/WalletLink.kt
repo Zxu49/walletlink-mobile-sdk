@@ -46,8 +46,10 @@ class WalletLink(private val notificationUrl: URL, context: Context) : WalletLin
     private var connections = ConcurrentHashMap<URL, WalletLinkConnection>()
     // new
     private val serialScheduler = Schedulers.single()
-
     override val requestsObservable: Observable<HostRequest> = requestsSubject.hide()
+    // add observable
+    private val responseSubject = PublishSubject.create<String>()
+    val responseObservable: Observable<String> = responseSubject.hide()
 
     override fun sessions(): List<Session> = linkRepository.sessions
 
@@ -115,9 +117,9 @@ class WalletLink(private val notificationUrl: URL, context: Context) : WalletLin
     }
 
     override fun setMetadata(key: ClientMetadataKey, value: String): Single<Unit> = connections.values
-            .map { it.setMetadata(key = key, value = value).asUnit().onErrorReturn { Single.just(Unit) } }
-            .zipOrEmpty()
-            .asUnit()
+        .map { it.setMetadata(key = key, value = value).asUnit().onErrorReturn { Single.just(Unit) } }
+        .zipOrEmpty()
+        .asUnit()
 
     override fun approve(requestId: HostRequestId, signedData: ByteArray): Single<Unit> {
         val connection = connections[requestId.url] ?: return Single.error(
@@ -198,20 +200,61 @@ class WalletLink(private val notificationUrl: URL, context: Context) : WalletLin
 
     private fun sendDAppPermissionEvent(sessionID : String, secret : String){
         val id = "13a09f7199d39999"
-        val method = "requestEthereumAccounts"
         val appName = "CS690 Team 15 DApp"
         val appLogoUrl = "https://app.compound.finance/images/compound-192.png"
         val origin = "https://www.usfca.edu"
-        val jsonRPC = JsonRPCRequestDTO(id = id, request = Request(method = method, params = Params(appName, appLogoUrl)), origin = origin)
+        val jsonRPC = JsonRPCRequestDAppPermissionDataDTO(id = id, request = JsonRPCRequestDAppPermissionDataDTO.Request(
+            method = "requestEthereumAccounts",
+            params = JsonRPCRequestDAppPermissionDataDTO.Params(appName, appLogoUrl)
+        ), origin = origin)
+        val temp = jsonRPC.asJsonString()
+        println(temp)
         val data = JSON.toJsonString(jsonRPC).encryptUsingAES256GCM(secret)
         val event = PublishEventTestDTO(id = 4,  sessionId = sessionID, event = EventType.Web3Request, data = data)
         WebsocketClient.sendDataString(event.asJsonString())
     }
 
+    fun sendSignPersonalData(data : String, sessionID: String, secret: String) {
+        sendSignPersonalDataEvent(data, sessionID,secret)
+    }
+
+    private fun sendSignPersonalDataEvent(data: String, sessionID: String, secret: String) {
+        val event = PublishEventTestDTO(id = 5,  sessionId = sessionID, event = EventType.Web3Request, data = data)
+        WebsocketClient.sendDataString(event.asJsonString())
+    }
+
+    fun sendSignTypedData(data : String, sessionID: String, secret: String){
+        sendSignTypedDataEvent(data, sessionID,secret)
+    }
+
+    private fun sendSignTypedDataEvent(data: String, sessionID: String, secret: String) {
+        val event = PublishEventTestDTO(id = 6,  sessionId = sessionID, event = EventType.Web3Request, data = data)
+        WebsocketClient.sendDataString(event.asJsonString())
+    }
+
+    fun sendStartTransaction(data : String, sessionID: String, secret: String) {
+        sendStartTransactionEvent(data, sessionID,secret)
+    }
+
+    private fun sendStartTransactionEvent(data: String, sessionID: String, secret: String) {
+        val event = PublishEventTestDTO(id = 7,  sessionId = sessionID, event = EventType.Web3Request, data = data)
+        WebsocketClient.sendDataString(event.asJsonString())
+    }
+
+    fun sendCancel(data : String, sessionID: String, secret: String) {
+        sendCancelEvent(data, sessionID,secret)
+    }
+
+    private fun sendCancelEvent(data: String, sessionID: String, secret: String) {
+        val event = PublishEventTestDTO(id = 8,  sessionId = sessionID, event = EventType.Web3Request, data = data)
+        WebsocketClient.sendDataString(event.asJsonString())
+    }
+
+
     private fun processHostSessionResponse(incoming : String ,sessionID: String, secret: String) {
         try{
             if (incoming == "Socket Closed") {
-                println("Socket close in processHostSessionResponse")
+                responseSubject.onNext("Socket close in processHostSessionResponse")
             }
             val obj = JSONObject(incoming)
 
@@ -237,19 +280,27 @@ class WalletLink(private val notificationUrl: URL, context: Context) : WalletLin
             val obj = JSONObject(incoming)
             val type = obj.getString("type")
             if (type == "Linked") {
-                println("Wallet has connected!!")
+                responseSubject.onNext("Wallet has connected!!")
             } else if (type == "Event") {
+                try {
+                    val dataArray = obj.getJSONArray("data")
+                    if (dataArray.length() > 0){
+                        responseSubject.onNext("The wallet has approved your APP!!!")
+                    }
+                } catch( e: Exception) {
+                    println(e)
+                }
                 val data = obj.getString("data")
                 val x = decryptData(data, secret)
                 val r = x?.response
                 val e = r?.errorMessage
                 if (e != "User rejected signature request") {
-                    println("The wallet has approved your request!!!")
+                    responseSubject.onNext("The wallet has approved your request!!!")
                 } else {
-                    println("The wallet has rejected your request, please try again")
+                    responseSubject.onNext("The wallet has rejected your request, please try again")
                 }
             }
-        } catch (e : WalletLinkException) {
+        } catch (e : Exception) {
             println(e)
         }
     }
