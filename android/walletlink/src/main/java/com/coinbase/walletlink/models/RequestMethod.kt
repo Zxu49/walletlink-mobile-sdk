@@ -6,7 +6,7 @@ package com.coinbase.walletlink.models
 import com.squareup.moshi.Json
 
 // / Host request method
-internal enum class RequestMethod(val rawValue: String) {
+enum class RequestMethod(val rawValue: String) {
     /**
      * Request ethereum address from the user
      */
