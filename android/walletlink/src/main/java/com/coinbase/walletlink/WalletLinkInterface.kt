@@ -132,6 +132,6 @@ interface WalletLinkInterface {
      *
      * @return
      */
-    fun sendHostSessionRequest(sessionID : String, secret : String)
+    fun sendHostSessionRequest(data: String, sessionID : String, secret : String)
 
 }
