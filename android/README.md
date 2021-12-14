@@ -43,6 +43,44 @@ You may need to update the submodule before using.
 $ git submodule update --remote --recursive
 ```
 
+#### [Optional] 5. Recommand library for quick start usage 
+
+``` 
+// build.bundle of app 
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.6.0" // Make sure the kotlin library version is higher than 1.5.31
+    implementation 'androidx.appcompat:appcompat:1.3.1'
+    implementation 'androidx.core:core-ktx:1.6.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
+    implementation project(path: ':walletlink')
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    implementation(
+        // Barcode
+        'io.github.g00fy2.quickie:quickie-bundled:1.2.4',
+        'com.google.zxing:core:3.3.3',
+        'com.journeyapps:zxing-android-embedded:3.6.0',
+         // ReactiveX 2
+        "io.reactivex.rxjava2:rxjava:",
+        "io.reactivex.rxjava2:rxkotlin:",
+        'io.reactivex.rxjava2:rxandroid:2.0.1',
+        // Web3
+        "org.web3j:infura:4.2.1-android",
+        'org.web3j:core:4.8.7-android',
+        "org.jetbrains.kotlinx:kotlinx-coroutines-core:",
+        // UI
+        'com.google.android.material:material:1.4.0',
+        // Submodule of walletlink
+        project(path: ':libraries:core'),
+        project(path: ':libraries:stores'),
+        project(path: ':libraries:http'),
+        project(path: ':libraries:crypto'),
+    )
+}
+```
+
 ### Clean up
 
 ```
