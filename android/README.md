@@ -4,7 +4,7 @@
 
 With the WalletLink SDK, your mobile wallet will be able to interact with DApps on the desktop and be able to sign web3 transactions and messages.
 
-[Our Team Fork](https://github.com/Zxu49/walletlink-mobile-sdk) has expanded the Android part SDK on this basis, so that the SDK can not only allow to support mobile wallet, but also could support DApp side to send web3 transactions and message to wallets.
+[Our Team Fork](https://github.com/Zxu49/walletlink-mobile-sdk) has expanded the Android part SDK on this basis, so that the SDK can not only support mobile wallets, but also could support DApp to send web3 transactions and messages to wallets.
 
 ## How to use our SDK
 
@@ -12,9 +12,9 @@ With the WalletLink SDK, your mobile wallet will be able to interact with DApps 
 
 **Prerequisite:**
 
-* An Android project under a Git repository,  you project should be a git repo before use [git submoudle](https://git-scm.com/book/en/v2/Git-Tools-Submodules) command.
-* This SDK uses [git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules) to combine different components for relatively independent development, they may recursively relate on some [core library](https://github.com/Zxu49/CBCore). Make sure your SDK is kept up-to-date before using.
-* Lastest Android studio arctic fox may not be able to automatically import submodules, you can choose to manually import submodules or use other versions of android studio. See [issues](https://stackoverflow.com/questions/68862846/i-cant-import-module-from-source-the-finish-button-is-off)
+* An Android project under a Git repository, your project should be a git repo before using the [git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules) command.
+* This SDK uses the [git submodule](https://git-scm.com/book/en/v2/Git-Tools-Submodules) to combine different components for relatively independent development; they may recursively relate to the same [core library](https://github.com/Zxu49/CBCore). Make sure your SDK is kept up-to-date before using.
+* Latest Android studio arctic fox may not be able to automatically import submodules, you can choose to manually import submodules or use other versions of android studio. See [issues](https://stackoverflow.com/questions/68862846/i-cant-import-module-from-source-the-finish-button-is-off)
 
 #### 1. Add WalletLink as a submodule
 
@@ -26,20 +26,20 @@ $ git submodule add git@github.com:Zxu49/walletlink-mobile-sdk.git
 #### 2. Update the submodule
 
 ```
-# You may find the directorie of libiray of walletlink empty, init the submodule and update
+# You may find the directory of library of wallet link empty, init the submodule and update
 $ git submodule update --init --recursive
 ```
 
 #### 3. Import the module in your Android Project
 
-In android studio, go to **File menu**, choose -> **New** ->  **Import module**, select **walletlink/android** folder as module. If button is off after selected, see [issues](https://stackoverflow.com/questions/68862846/i-cant-import-module-from-source-the-finish-button-is-off).
+In android studio, go to **File menu**, choose -> **New** ->  **Import module**, select **walletlink/android** folder as module. If the finish button is off after selected, see [issues](https://stackoverflow.com/questions/68862846/i-cant-import-module-from-source-the-finish-button-is-off).
 
 #### [Optional] 4. Upate you the submodule in your repo
 
-You may need to update the submoudle before using.
+You may need to update the submodule before using.
 
 ```
-# Use it to update after you first time init the submodule.
+# Use it to update after your first time initializing the submodule.
 $ git submodule update --remote --recursive
 ```
 
@@ -149,7 +149,7 @@ Init the instance like wallet side
     val walletLink = WalletLink(notificationUrl, context)
 ```
 
-1. Genearted sercet and session id into QR code, and established websocket to bridge server
+1. Generated secret and session id into QR code, and established websocket to bridge server
 
 ```
     // This will connect to wallet link server using websocket
@@ -182,14 +182,14 @@ Init the instance like wallet side
 
 4. Send personal string to bridge sever, then pass it to connected wallet  
 ```
-    // data JsonRPCRequestPersonalDataDTO class encrpted by secret using AES
+    // data JsonRPCRequestPersonalDataDTO class encrypted by secret using AES
     val data = JSON.toJsonString(jsonRPC).encryptUsingAES256GCM(secret)
     walletLink.sendSignPersonalData(data, sessionID)
 ```
 
 5. Send typed data (JSON-RPC) to bridge sever, then pass it to connected wallet  
 ```
-    // data JsonRPCRequestTypedDataDTO class encrpted by secret using AES
+    // data JsonRPCRequestTypedDataDTO class encrypted by secret using AES
     val data = JSON.toJsonString(jsonRPC).encryptUsingAES256GCM(secret)
     walletLink.sendSignTypedData(data, sessionID)
 ```
@@ -197,7 +197,7 @@ Init the instance like wallet side
 6. Submit the Transaction request to bridge sever, then pass it to connected wallet  
 
 ```
-    // data JsonRPCRequestTransactionDataDTO class encrpted by secret using AES
+    // data JsonRPCRequestTransactionDataDTO class encrypted by secret using AES
     // the data will be wrapped inside the PublishEventDTO
     val data = JSON.toJsonString(jsonRPC).encryptUsingAES256GCM(secret)
     walletLink.sendStartTransaction(data,sessionID,secret)  
@@ -215,15 +215,14 @@ Init the instance like wallet side
 
 ### The DTO class (Data Transfer Object)
 
-The DAPP and wallet will using serval DTO to transfer data.
-For extend the functionality of DApp, we create five JSONRPC realated DTO class for tranfer data easier. 
-Here are some examples showing how to use these object.
+The DAPP and wallet will use several DTOs to transfer data. 
+To extend the functionality of DApp, we create five JSON-RPC related DTO classes for easier transfer data. Here are some examples showing how to use these objects.
 
 1. JsonRPCRequestDAppPermissionDataDTO
 
-Request the connection permission of wallet. 
-If wallet wallet reject, the socket should be disconnect.
-If approve the following DTO should use same 'origin' field.
+Request the connection permission of the wallet. 
+If the wallet rejects, the socket should be disconnected.
+If approved, the following DTO should use the same 'origin' field.
 
 ```
     val jsonRPC = JsonRPCRequestDAppPermissionDataDTO(
@@ -235,7 +234,7 @@ If approve the following DTO should use same 'origin' field.
                 appLogoUrl // The logo url for showing on the wallet
                 )
             ), 
-        origin = origin // the url of dapp, should use same 'origin' field in one socket connection.
+        origin = origin // the url of dapp, should use the same 'origin' field in one socket connection.
     )
 ```
 
@@ -255,7 +254,7 @@ For sending personal string to confirm the encryption method.
                 typedDataJson // The type of params using on smart contract 
             )
         ), 
-        origin = origin // the url of dapp, should use same 'origin' field in one socket connection.
+        origin = origin // the url of dapp, should use the same 'origin' field in one socket connection.
     )
 ```
 
@@ -274,13 +273,13 @@ For sending typed data to confirm the format of RPC is matching, also use for se
                 weiValue, // The smallest unit of cryptocurrency
                 jsonData, // The value of params using on smart contract 
                 nonce, // Random number to avoid Replay Attacks of transaction
-                gasPriceInWei, // The price pay for a transaction.
+                gasPriceInWei, // The price paid for a transaction.
                 gasLimit, // The maximum price in one transaction
                 chainId, // Blockchain Id - 3 is test network
                 shouldSubmit // Whether should submit or not for a transaction
             )
         ), 
-        origin = origin // the url of dapp, should use same 'origin' field in one socket connection.
+        origin = origin // the url of dapp, should use the same 'origin' field in one socket connection.
     )
 ```
 
@@ -298,6 +297,6 @@ For submit a transaction given the signedTransaction to wallet
                 chainId  // Blockchain Id - 3 is test network
             )
         ), 
-        origin = origin // the url of dapp, should use same 'origin' field in one socket connection.
+        origin = origin // the url of dapp, should use the same 'origin' field in one socket connection.
     )
 ```
