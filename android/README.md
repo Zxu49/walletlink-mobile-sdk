@@ -34,7 +34,7 @@ $ git submodule update --init --recursive
 
 In android studio, go to **File menu**, choose -> **New** ->  **Import module**, select **walletlink/android** folder as module. If the finish button is off after selected, see [issues](https://stackoverflow.com/questions/68862846/i-cant-import-module-from-source-the-finish-button-is-off).
 
-#### [Optional] 4. Upate you the submodule in your repo
+#### [Optional] 4. Update you the submodule in your repo
 
 You may need to update the submodule before using.
 
