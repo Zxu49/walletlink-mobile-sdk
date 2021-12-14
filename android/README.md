@@ -63,153 +63,153 @@ git rm -f path/to/submodule
 1. Monitoring the network and Init the walletlink instance
 
 ```
-val intentFilter = IntentFilter().apply { addAction(ConnectivityManager.CONNECTIVITY_ACTION) }
-this.registerReceiver(Internet, intentFilter)
-Internet.startMonitoring()
+    val intentFilter = IntentFilter().apply { addAction(ConnectivityManager.CONNECTIVITY_ACTION) }
+    this.registerReceiver(Internet, intentFilter)
+    Internet.startMonitoring()
 ```
 
 ```
-val walletLink = WalletLink(notificationUrl, context)
+    val walletLink = WalletLink(notificationUrl, context)
 ```
 
 2. Link to bridge server, the session id and secret come from Dapp will generate a dapp instance and be subscribed on walletlink instance.
 
 ```kotlin
-// To pair the device with a browser after scanning WalletLink QR code
-walletLink.link(
-    sessionId = sessionId,
-    secret = secret,
-    url = serverUrl,
-    userId = userId,
-    metadata = mapOf(ClientMetadataKey.EthereumAddress to wallet.primaryAddress)
-)
-    .subscribeBy(onSuccess = {
-// New WalletLink connection was established
-    }, onError = { error ->
-// Error while connecting to WalletLink server (walletlinkd)
-    })
-    .addTo(disposeBag)
+    // To pair the device with a browser after scanning WalletLink QR code
+    walletLink.link(
+        sessionId = sessionId,
+        secret = secret,
+        url = serverUrl,
+        userId = userId,
+        metadata = mapOf(ClientMetadataKey.EthereumAddress to wallet.primaryAddress)
+    )
+        .subscribeBy(onSuccess = {
+    // New WalletLink connection was established
+        }, onError = { error ->
+    // Error while connecting to WalletLink server (walletlinkd)
+        })
+        .addTo(disposeBag)
 ```
 
 3. Listen on incoming requests from the subscribed Dapp
 
 ```kotlin
-/*
-Listen on incoming requests, it should be requestsObservable not requests,
-the origin sdk readme is incorrect
-*/
-walletLink.requestsObservable
-    .observeOn(AndroidSchedulers.mainThread())
-    .subscribeBy(onNext = { request ->
-// New unseen request
-    })
-    .addTo(disposeBag)
+    /*
+    Listen on incoming requests, it should be requestsObservable not requests,
+    the origin sdk readme is incorrect
+    */
+    walletLink.requestsObservable
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribeBy(onNext = { request ->
+    // New unseen request
+        })
+        .addTo(disposeBag)
 ```
 
 4. The function is not provided in original branch
 
 ```kotlin
-// Approve DApp permission request (EIP-1102)
-walletLink.approveDappPermission(request.hostRequestId)
-    .subscribeBy(onSuccess = {
-// Dapp received EIP-1102 approval
-    }, onError = { error ->
-// Dapp failed to receive EIP-1102 approval
-    })
-    .addTo(disposeBag)
+    // Approve DApp permission request (EIP-1102)
+    walletLink.approveDappPermission(request.hostRequestId)
+        .subscribeBy(onSuccess = {
+    // Dapp received EIP-1102 approval
+        }, onError = { error ->
+    // Dapp failed to receive EIP-1102 approval
+        })
+        .addTo(disposeBag)
 ```
 
 5. Approve or reject the request come from Dapp
 
 ```kotlin
-// Approve a given transaction/message signing request
-walletLink.approve(request.hostRequestId, signedData)
-    .subscribeBy(onSuccess = {
-// Dapp received request approval
-    }, onError = { error ->
-// Dapp failed to receive request approval
-    })
-    .addTo(disposeBag)
+    // Approve a given transaction/message signing request
+    walletLink.approve(request.hostRequestId, signedData)
+        .subscribeBy(onSuccess = {
+    // Dapp received request approval
+        }, onError = { error ->
+    // Dapp failed to receive request approval
+        })
+        .addTo(disposeBag)
 
 
-// Reject transaction/message/EIP-1102 request
-walletLink.reject(request.hostRequestId)
-    .subscribeBy(onSuccess = {
-// Dapp received request rejection
-    }, onError = { error ->
-// Dapp failed to receive request rejection
-    })
-    .addTo(disposeBag)
+    // Reject transaction/message/EIP-1102 request
+    walletLink.reject(request.hostRequestId)
+        .subscribeBy(onSuccess = {
+    // Dapp received request rejection
+        }, onError = { error ->
+    // Dapp failed to receive request rejection
+        })
+        .addTo(disposeBag)
 ```
 
 ### Dapp Side
 
-init the instance like wallet side
+Init the instance like wallet side
 ```
-val walletLink = WalletLink(notificationUrl, context)
+    val walletLink = WalletLink(notificationUrl, context)
 ```
 
 1. Genearted sercet and session id into QR code, and established websocket to bridge server
 
 ```
-// This will connect to wallet link server using websocket
-// data is JSON RPC for establish host session, more info see our example format
-// session Id is 32 width randomly generated alphabet string 
-// secret is 64 width randomly generated alphabet string 
+    // This will connect to wallet link server using websocket
+    // data is JSON RPC for establish host session, more info see our example format
+    // session Id is 32 width randomly generated alphabet string 
+    // secret is 64 width randomly generated alphabet string 
 
-walletLink.sendHostSessionRequest(data, sessionID, secret)
+    walletLink.sendHostSessionRequest(data, sessionID, secret)
 ```
 
 2. Using observable mode listing the response from connected socket
 
 ```
-walletLink.responseObservable
-    .observeOn(serialScheduler)
-    .subscribe { 
-       // get socket response from socket
-    }.addTo(disposeBag)
-
+    walletLink.responseObservable
+        .observeOn(serialScheduler)
+        .subscribe { 
+        // get socket response from socket
+        }.addTo(disposeBag)
 ```
 3. Using observable mode listing the address from connected socket
 
 ```
-walletLink.addressObservable
-    .observeOn(serialScheduler)
-    .subscribe {
-       // get socket address from socket
-    }
-    .addTo(disposeBag)
+    walletLink.addressObservable
+        .observeOn(serialScheduler)
+        .subscribe {
+        // get socket address from socket
+        }
+        .addTo(disposeBag)
 ```
 
 4. Send personal string to bridge sever, then pass it to connected wallet  
 ```
-// data JsonRPCRequestPersonalDataDTO class encrpted by secret using AES
-val data = JSON.toJsonString(jsonRPC).encryptUsingAES256GCM(secret)
-walletLink.sendSignPersonalData(data, sessionID)
+    // data JsonRPCRequestPersonalDataDTO class encrpted by secret using AES
+    val data = JSON.toJsonString(jsonRPC).encryptUsingAES256GCM(secret)
+    walletLink.sendSignPersonalData(data, sessionID)
 ```
 
 5. Send typed data (JSON-RPC) to bridge sever, then pass it to connected wallet  
 ```
-// data JsonRPCRequestTypedDataDTO class encrpted by secret using AES
-val data = JSON.toJsonString(jsonRPC).encryptUsingAES256GCM(secret)
-walletLink.sendSignTypedData(data, sessionID)
+    // data JsonRPCRequestTypedDataDTO class encrpted by secret using AES
+    val data = JSON.toJsonString(jsonRPC).encryptUsingAES256GCM(secret)
+    walletLink.sendSignTypedData(data, sessionID)
 ```
 
 6. Submit the Transaction request to bridge sever, then pass it to connected wallet  
 
 ```
-// data JsonRPCRequestTransactionDataDTO class encrpted by secret using AES
-// the data will be wrapped inside the PublishEventDTO
-val data = JSON.toJsonString(jsonRPC).encryptUsingAES256GCM(secret)
-walletLink.sendStartTransaction(data,sessionID,secret)  
+    // data JsonRPCRequestTransactionDataDTO class encrpted by secret using AES
+    // the data will be wrapped inside the PublishEventDTO
+    val data = JSON.toJsonString(jsonRPC).encryptUsingAES256GCM(secret)
+    walletLink.sendStartTransaction(data,sessionID,secret)  
 ```
 
 7. Cancel the previous the Transaction request to bridge sever, then pass it to connected wallet  
 
 ```
-// data JsonRPCRequestCancelDataDTO class encrpted by secret using AES
-// the data will be wrapped inside the PublishEventDTO
-walletLink.sendCancel(data,sessionID,secret)
+    // data JsonRPCRequestCancelDataDTO class encrpted by secret using AES
+    // the data will be wrapped inside the PublishEventDTO
+    val data = JSON.toJsonString(jsonRPC).encryptUsingAES256GCM(secret)
+    walletLink.sendCancel(data,sessionID,secret)
 
 ```
 
@@ -220,9 +220,11 @@ For extend the functionality of DApp, we create five JSONRPC realated DTO class 
 Here are some examples showing how to use these object.
 
 1. JsonRPCRequestDAppPermissionDataDTO
+
 Request the connection permission of wallet. 
 If wallet wallet reject, the socket should be disconnect.
 If approve the following DTO should use same 'origin' field.
+
 ```
     val jsonRPC = JsonRPCRequestDAppPermissionDataDTO(
         id = id, // the id for identify order of process to call method, since the response is async
@@ -238,6 +240,7 @@ If approve the following DTO should use same 'origin' field.
 ```
 
 2. JsonRPCRequestPersonalDataDTO
+
 For sending personal string to confirm the encryption method.
 
 ```
@@ -257,6 +260,7 @@ For sending personal string to confirm the encryption method.
 ```
 
 3. JsonRPCRequestTypedDataDTO
+
 For sending typed data to confirm the format of RPC is matching, also use for sending a real transaction request to wallet
 
 ```
@@ -281,6 +285,7 @@ For sending typed data to confirm the format of RPC is matching, also use for se
 ```
 
 4. JsonRPCRequestTransactionDataDTO
+
 For submit a transaction given the signedTransaction to wallet
 
 ```
