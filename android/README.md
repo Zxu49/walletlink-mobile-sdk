@@ -144,27 +144,155 @@ walletLink.reject(request.hostRequestId)
 
 ### Dapp Side
 
+init the instance like wallet side
 ```
 val walletLink = WalletLink(notificationUrl, context)
 ```
 
-
-
 1. Genearted sercet and session id into QR code, and established websocket to bridge server
 
 ```
-walletLink.sendHostSessionRequest(sessionID, secret)
+// This will connect to wallet link server using websocket
+// data is JSON RPC for establish host session, more info see our example format
+// session Id is 32 width randomly generated alphabet string 
+// secret is 64 width randomly generated alphabet string 
+
+walletLink.sendHostSessionRequest(data, sessionID, secret)
 ```
 
-```
-walletLink.sendStartTransaction(data,sessionID,secret)
-```
+2. Using observable mode listing the response from connected socket
 
 ```
-walletLink.sendSignPersonalData(data, sessionID, secret)
+walletLink.responseObservable
+    .observeOn(serialScheduler)
+    .subscribe { 
+       // get socket response from socket
+    }.addTo(disposeBag)
 
 ```
+3. Using observable mode listing the address from connected socket
+
 ```
+walletLink.addressObservable
+    .observeOn(serialScheduler)
+    .subscribe {
+       // get socket address from socket
+    }
+    .addTo(disposeBag)
+```
+
+4. Send personal string to bridge sever, then pass it to connected wallet  
+```
+// data JsonRPCRequestPersonalDataDTO class encrpted by secret using AES
+val data = JSON.toJsonString(jsonRPC).encryptUsingAES256GCM(secret)
+walletLink.sendSignPersonalData(data, sessionID)
+```
+
+5. Send typed data (JSON-RPC) to bridge sever, then pass it to connected wallet  
+```
+// data JsonRPCRequestTypedDataDTO class encrpted by secret using AES
+val data = JSON.toJsonString(jsonRPC).encryptUsingAES256GCM(secret)
+walletLink.sendSignTypedData(data, sessionID)
+```
+
+6. Submit the Transaction request to bridge sever, then pass it to connected wallet  
+
+```
+// data JsonRPCRequestTransactionDataDTO class encrpted by secret using AES
+// the data will be wrapped inside the PublishEventDTO
+val data = JSON.toJsonString(jsonRPC).encryptUsingAES256GCM(secret)
+walletLink.sendStartTransaction(data,sessionID,secret)  
+```
+
+7. Cancel the previous the Transaction request to bridge sever, then pass it to connected wallet  
+
+```
+// data JsonRPCRequestCancelDataDTO class encrpted by secret using AES
+// the data will be wrapped inside the PublishEventDTO
 walletLink.sendCancel(data,sessionID,secret)
 
+```
+
+### The DTO class (Data Transfer Object)
+
+The DAPP and wallet will using serval DTO to transfer data.
+For extend the functionality of DApp, we create five JSONRPC realated DTO class for tranfer data easier. 
+Here are some examples showing how to use these object.
+
+1. JsonRPCRequestDAppPermissionDataDTO
+Request the connection permission of wallet. 
+If wallet wallet reject, the socket should be disconnect.
+If approve the following DTO should use same 'origin' field.
+```
+    val jsonRPC = JsonRPCRequestDAppPermissionDataDTO(
+        id = id, // the id for identify order of process to call method, since the response is async
+        request = JsonRPCRequestDAppPermissionDataDTO.Request(
+            method = "requestEthereumAccounts",  // The RPC method name 
+            params = JsonRPCRequestDAppPermissionDataDTO.Params(
+                appName,  // The app name showing on the wallet
+                appLogoUrl // The logo url for showing on the wallet
+                )
+            ), 
+        origin = origin // the url of dapp, should use same 'origin' field in one socket connection.
+    )
+```
+
+2. JsonRPCRequestPersonalDataDTO
+For sending personal string to confirm the encryption method.
+
+```
+    val jsonRPC = JsonRPCRequestPersonalDataDTO(
+        id = id,  // the id for identify order of process to call method, since the response is async
+        request = Web3RequestPersonalData(
+            method = RequestMethod.SignEthereumMessage, // The RPC method name 
+            params = SignEthereumMessageParamsRPC(
+                inputString, // The custom string
+                address, // The wallet address
+                addPrefix, // The add prefix for input string
+                typedDataJson // The type of params using on smart contract 
+            )
+        ), 
+        origin = origin // the url of dapp, should use same 'origin' field in one socket connection.
+    )
+```
+
+3. JsonRPCRequestTypedDataDTO
+For sending typed data to confirm the format of RPC is matching, also use for sending a real transaction request to wallet
+
+```
+    val jsonRPC = JsonRPCRequestTypedDataDTO(
+        id = id,  // the id for identify order of process to call method, since the response is async
+        request = Web3RequestTypedData(
+            method = RequestMethod.SignEthereumTransaction, // The RPC method name 
+            params = SignEthereumTransactionParamsRPC( 
+                fromAddress, // Wallet address
+                toAddress, // Smart contract address
+                weiValue, // The smallest unit of cryptocurrency
+                jsonData, // The value of params using on smart contract 
+                nonce, // Random number to avoid Replay Attacks of transaction
+                gasPriceInWei, // The price pay for a transaction.
+                gasLimit, // The maximum price in one transaction
+                chainId, // Blockchain Id - 3 is test network
+                shouldSubmit // Whether should submit or not for a transaction
+            )
+        ), 
+        origin = origin // the url of dapp, should use same 'origin' field in one socket connection.
+    )
+```
+
+4. JsonRPCRequestTransactionDataDTO
+For submit a transaction given the signedTransaction to wallet
+
+```
+    val jsonRPC = JsonRPCRequestTransactionDataDTO(
+        id = id,  // the id for identify order of process to call method, since the response is async
+        request = Web3RequestTransactionData( // The RPC method name 
+            method = RequestMethod.SubmitEthereumTransaction,
+            params = SubmitEthereumTransactionParamsRPC(
+                signedTransaction,  // String - Signature transaction data in hexadecimal format
+                chainId  // Blockchain Id - 3 is test network
+            )
+        ), 
+        origin = origin // the url of dapp, should use same 'origin' field in one socket connection.
+    )
 ```
