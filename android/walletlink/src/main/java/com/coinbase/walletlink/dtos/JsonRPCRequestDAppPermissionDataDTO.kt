@@ -1,5 +1,6 @@
 package com.coinbase.walletlink.dtos
 
+import com.coinbase.wallet.core.interfaces.JsonSerializable
 import com.coinbase.wallet.core.util.JSON
 import com.squareup.moshi.Json
 
@@ -8,9 +9,9 @@ data class JsonRPCRequestDAppPermissionDataDTO (
     val id: String,
     val request: Request,
     val origin: String
-) {
+) : JsonSerializable {
     @ExperimentalUnsignedTypes
-    fun asJsonString(): String = JSON.toJsonString(this)
+    override fun asJsonString(): String = JSON.toJsonString(this)
 
     companion object {
         @ExperimentalUnsignedTypes

@@ -328,13 +328,27 @@ For submit a transaction given the signedTransaction to wallet
 ```
     val jsonRPC = JsonRPCRequestTransactionDataDTO(
         id = id,  // the id for identify order of process to call method, since the response is async
-        request = Web3RequestTransactionData( // The RPC method name 
-            method = RequestMethod.SubmitEthereumTransaction,
+        request = Web3RequestTransactionData( 
+            method = RequestMethod.SubmitEthereumTransaction, // The RPC method name 
             params = SubmitEthereumTransactionParamsRPC(
                 signedTransaction,  // String - Signature transaction data in hexadecimal format
                 chainId  // Blockchain Id - 3 is test network
             )
         ), 
+        origin = origin // the url of dapp, should use the same 'origin' field in one socket connection.
+    )
+```
+
+5. JsonRPCRequestCancelDataDTO 
+
+Cancel the previous request according to id
+
+```
+    val jsonRPC = JsonRPCRequestCancelDataDTO(
+        id = id, // the id for identify order of process to call method, since the response is async
+        request = Web3RequestCancelData(
+            method = RequestMethod.RequestCanceled // The RPC method name 
+        ),
         origin = origin // the url of dapp, should use the same 'origin' field in one socket connection.
     )
 ```
