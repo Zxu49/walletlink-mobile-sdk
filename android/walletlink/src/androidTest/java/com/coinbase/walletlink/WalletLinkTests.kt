@@ -46,6 +46,7 @@ class WalletLinkTests {
             walletLink.link(
                 sessionId = "bcb17224553554b53053d70cc6d05cbb",
                 userId = "1",
+                version = "1",
                 secret = "d2a4092708e194c850715682ee862b0a767f5a268637649aae0a4ea0eadb216f",
                 url = URL("https://www.walletlink.org"),
                 metadata = metadata
