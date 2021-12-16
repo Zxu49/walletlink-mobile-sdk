@@ -6,6 +6,10 @@ With the WalletLink SDK, your mobile wallet will be able to interact with DApps 
 
 [Our Team Fork](https://github.com/Zxu49/walletlink-mobile-sdk) has expanded the Android part SDK on this basis, so that the SDK can not only support mobile wallets, but also could support DApp to send web3 transactions and messages to wallets.
 
+[Our Demo Dapp](https://github.com/Zxu49/demo) example show how to use the SDK to build DAPP.
+
+[Our Demo Wallet](https://github.com/Zxu49/DemoWallet) example show how to use the SDK to build Wallet. 
+
 ## How to use our SDK
 
 ### Installation
@@ -62,14 +66,14 @@ dependencies {
         'io.github.g00fy2.quickie:quickie-bundled:1.2.4',
         'com.google.zxing:core:3.3.3',
         'com.journeyapps:zxing-android-embedded:3.6.0',
-         // ReactiveX 2
-        "io.reactivex.rxjava2:rxjava:",
-        "io.reactivex.rxjava2:rxkotlin:",
+        // ReactiveX 2
+        "io.reactivex.rxjava2:rxjava:2.2.0",
+        "io.reactivex.rxjava2:rxkotlin:2.3.0",
         'io.reactivex.rxjava2:rxandroid:2.0.1',
         // Web3
         "org.web3j:infura:4.2.1-android",
         'org.web3j:core:4.8.7-android',
-        "org.jetbrains.kotlinx:kotlinx-coroutines-core:",
+        "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.2.1",
         // UI
         'com.google.android.material:material:1.4.0',
         // Submodule of walletlink
