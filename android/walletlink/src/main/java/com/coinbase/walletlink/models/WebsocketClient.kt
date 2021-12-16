@@ -11,7 +11,9 @@ import okhttp3.*
 import okio.ByteString
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
-
+/**
+ * A helper WebSocket class for handing DApp requests and responses
+ */
 object WebsocketClient {
     private const val NORMAL_CLOSURE_STATUS = 1000
     private var sClient: OkHttpClient? = null

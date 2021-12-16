@@ -185,6 +185,12 @@ class WalletLink(private val notificationUrl: URL, context: Context) : WalletLin
             .addTo(disposeBag)
     }
 
+    /**
+     * Create host session on DAPP (the 1st request)
+     * @param data encrypted data with id, app name, url, origin
+     * @param sessionID random generated session ID
+     * @param secret random generated secret
+     */
     override fun sendHostSessionRequest(data: String, sessionID : String, secret : String){
         WebsocketClient.startRequest()
         WebsocketClient.sendHostSessionMessage(sessionID,secret)
@@ -194,56 +200,106 @@ class WalletLink(private val notificationUrl: URL, context: Context) : WalletLin
             .addTo(disposeBag)
     }
 
+    /**
+     * Use WebSocket to send isLink request (the 2nd request)
+     * @param sessionID session ID
+     */
     private fun sendIsLinkedRequest(sessionID : String){
         WebsocketClient.sendIsLinkedMessage(sessionID)
     }
 
+    /**
+     * Use WebSocket to send session config request (the 3rd request)
+     * @param sessionID session ID
+     */
     private fun sendSessionConfig(sessionID : String){
         WebsocketClient.sendGetSessionConfigMessage(sessionID)
     }
 
+    /**
+     * Send the DAPP permission event
+     * @param data encrypted data with id, app name, url, origin
+     * @param sessionID session ID
+     */
     private fun sendDAppPermissionDataEvent(data: String, sessionID : String){
         val event = PublishEventTestDTO(id = 4,  sessionId = sessionID, event = EventType.Web3Request, data = data)
         WebsocketClient.sendDataString(event.asJsonString())
     }
 
+    /**
+     * Send the sign personal data event
+     * @param data encrypted data containing inputString, address, addPrefix, typedDataJson
+     * @param sessionID session ID
+     */
     fun sendSignPersonalData(data : String, sessionID: String) {
         sendSignPersonalDataEvent(data, sessionID)
     }
 
+    /**
+     * Private function for sending sign personal data event
+     */
     private fun sendSignPersonalDataEvent(data: String, sessionID: String) {
         val event = PublishEventTestDTO(id = 5,  sessionId = sessionID, event = EventType.Web3Request, data = data)
         WebsocketClient.sendDataString(event.asJsonString())
     }
 
+    /**
+     * Send the sign typed data event
+     * @param data encrypted data containing fromAddress, toAddress, weiValue, jsonData, nonce, gasPriceInWei, gasLimit, chainId, shouldSubmit
+     * @param sessionID session ID
+     */
     fun sendSignTypedData(data : String, sessionID: String){
         sendSignTypedDataEvent(data, sessionID)
     }
 
+    /**
+     * Private function for sending sign typed data event
+     */
     private fun sendSignTypedDataEvent(data: String, sessionID: String) {
         val event = PublishEventTestDTO(id = 6,  sessionId = sessionID, event = EventType.Web3Request, data = data)
         WebsocketClient.sendDataString(event.asJsonString())
     }
 
+    /**
+     * Send the signed transaction to the wallet
+     * @param data encrypted data containing signedTransaction, chainId
+     * @param sessionID session ID
+     */
     fun sendStartTransaction(data : String, sessionID: String) {
         sendStartTransactionEvent(data, sessionID)
     }
 
+    /**
+     * Private function for sending signed transaction
+     */
     private fun sendStartTransactionEvent(data: String, sessionID: String) {
         val event = PublishEventTestDTO(id = 7,  sessionId = sessionID, event = EventType.Web3Request, data = data)
         WebsocketClient.sendDataString(event.asJsonString())
     }
 
+    /**
+     * Cancel a transaction
+     * @param data encrypted data containing id and origin
+     * @param sessionID session ID
+     */
     fun sendCancel(data : String, sessionID: String) {
         sendCancelEvent(data, sessionID)
     }
 
+    /**
+     * Private function for canceling a transaction
+     */
     private fun sendCancelEvent(data: String, sessionID: String) {
         val event = PublishEventTestDTO(id = 8,  sessionId = sessionID, event = EventType.Web3Request, data = data)
         WebsocketClient.sendDataString(event.asJsonString())
     }
 
-
+    /**
+     * Function for handling host session responses
+     * @param data used for DApp permission
+     * @param incoming incoming host session response
+     * @param secret the random generated secret
+     */
     private fun processHostSessionResponse(data: String, incoming : String ,sessionID: String, secret: String) {
         try{
             if (incoming == "Socket Closed") {
@@ -268,6 +324,11 @@ class WalletLink(private val notificationUrl: URL, context: Context) : WalletLin
         }
     }
 
+    /**
+     * Function for handling event responses
+     * @param incoming response from the wallet
+     * @param secret the random generated secret
+     */
     private fun processIncomingData (incoming : String, secret: String) {
         try{
             val obj = JSONObject(incoming)
@@ -291,6 +352,11 @@ class WalletLink(private val notificationUrl: URL, context: Context) : WalletLin
         }
     }
 
+    /**
+     * Function for fetching wallet address from the response of DApp permission
+     * @param data the response of DApp permission request
+     * @param secret the random generated secret
+     */
     private fun decryptAddress(data : String, secret: String) {
         try {
             val x = data.decryptUsingAES256GCM(secret).toByteString()
@@ -304,6 +370,11 @@ class WalletLink(private val notificationUrl: URL, context: Context) : WalletLin
         }
     }
 
+    /**
+     * Function for decrypting data using AES 256
+     * @param data data to be decrypted
+     * @param secret the random generated secret for decrypting data
+     */
     private fun decryptData(data : String, secret: String): HostWeb3ResponseDTO? {
         val jsonString = data.decryptUsingAES256GCM(secret).toString(Charsets.UTF_8)
         return JSON.fromJsonString(jsonString)
