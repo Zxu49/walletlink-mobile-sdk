@@ -12,7 +12,7 @@ With the WalletLink SDK, your mobile wallet will be able to interact with DApps 
 
 ## How to use our SDK
 
-### Installation
+### Import
 
 **Prerequisite:**
 
@@ -356,3 +356,31 @@ Cancel the previous request according to id
         origin = origin // the url of dapp, should use the same 'origin' field in one socket connection.
     )
 ```
+
+## Test
+
+Junit and coroutines were used to test the functionality of SDK.
+
+To test SDK in your app level gradle.build:
+
+```
+testImplementation(
+"org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.kotlinCoroutine}",
+"junit:junit:${testVersions.junit4}"
+)
+```
+
+We implement several unit tests for each function or class we used or created. Here are some test path for SDK:
+
+```
+src/test/java/com/coinbase/walletlink/JsonRPCSerializableTests.kt
+src/test/java/com/coinbase/walletlink/JsonSerializableTests.kt
+src/test/java/com/coinbase/walletlink/URLExtensionTests.kt
+```
+
+You could run the test in Android studio by right clicking the file or use CTRL+SHIFT+F10 command to execute the test file.
+The latest version of postman also provides WebSocket version test cases. We test the WebSocket connection in postman first and then extend to the library. You can use our public test case in [link](https://www.postman.com/grey-capsule-483728/workspace/cs690-team15-crypto-wallet-payloads/request/17597497-5066442a-a74c-467d-bfd9-0d388291732d).
+
+We also provide more tests on our sample dapp and  wallet. The code follows the style of the original branch SDK, see link.
+
+To test the connection of the two apps interactively,  we run the test case on the DAPP side first and then test the wallet side. Since they are using the same session id for connection.
